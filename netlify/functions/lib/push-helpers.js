@@ -88,6 +88,38 @@ export async function removeSubscription(endpoint) {
   await store().delete(keyForEndpoint(endpoint)).catch(() => {});
 }
 
+// Mirrors database.js's appendNotificationLog() so reminders fired from
+// this cron job (payment balance nudges, duty call-outs) show up in every
+// resident's in-app Notification Center bell, not just as an OS push —
+// exactly like an on-demand notifyMembers() call from the app itself.
+// Best-effort, whole-value write (same tradeoff scheduled-reminders.js
+// already accepts for its own reminders/vessel-proof write-backs): a cron
+// tick and a live resident editing something else at the exact same
+// instant is rare enough not to warrant full CAS here.
+const NOTIF_LOG_KEY = "ms-villa:notifications";
+export async function appendNotificationLog(title, body, to) {
+  const s = store();
+  const log = (await s.get(NOTIF_LOG_KEY, { type: "json" }).catch(() => null)) || [];
+  log.push({
+    id: "n_" + Date.now() + Math.random().toString(36).slice(2, 6),
+    title,
+    body,
+    to: (to && to.length) ? to : null,
+    createdAt: new Date().toISOString(),
+    by: null // system-generated (cron), not a resident
+  });
+  while (log.length > 200) log.shift();
+  await s.setJSON(NOTIF_LOG_KEY, log).catch(() => {});
+  return log;
+}
+
+// Combines a push + in-app log entry the way the app's own notifyMembers()
+// does, so every scheduled reminder gets both delivery paths for free.
+export async function remind({ title, body, onlyUsernames, data }) {
+  await appendNotificationLog(title, body, onlyUsernames);
+  return sendToAll({ title, body, onlyUsernames, data });
+}
+
 // Sends a push to every stored subscription (optionally skipping one
 // username — typically the person who triggered the action). Prunes
 // subscriptions that the push service reports as gone (410/404), which
