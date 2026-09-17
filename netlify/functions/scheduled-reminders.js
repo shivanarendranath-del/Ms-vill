@@ -64,6 +64,38 @@ export default async () => {
     }
   }
 
+  // --- User-created reminders (Reminders screen in the app) --------------
+  // Any resident can set one for a specific date/time, either for
+  // themselves ("me") or the whole house ("all"). Fires once, within a
+  // window wide enough that a 15-minute cron never misses it.
+  const reminders = (await readKey("ms-villa:reminders")) || [];
+  let remindersChanged = false;
+  for (const reminder of reminders) {
+    if (!reminder.time || reminder.sent) continue;
+    const due = new Date(reminder.time).getTime();
+    const minutesPast = (now.getTime() - due) / 60000;
+    if (minutesPast >= 0 && minutesPast <= 20) {
+      const reminderId = `reminder:${reminder.id}`;
+      if (await alreadySent(reminderId)) continue;
+      const onlyUsernames = reminder.target === "me" ? [reminder.by] : undefined;
+      const r = await sendToAll({
+        title: `Reminder: ${reminder.title}`,
+        body: reminder.notes || "Tap to open Ms Villa.",
+        onlyUsernames
+      });
+      await markSent(reminderId);
+      reminder.sent = true;
+      remindersChanged = true;
+      results.push({ reminderId, ...r });
+    }
+  }
+  // Best-effort write-back so the app's Reminders screen can show it as
+  // fired — not CAS-guarded like the app's own saves, since this only ever
+  // flips `sent` on entries a resident already created, never drops data.
+  if (remindersChanged) {
+    await getStore(DATA_STORE).setJSON("ms-villa:reminders", reminders).catch(() => {});
+  }
+
   // --- Today's duty reminder (once, in the morning) -----------------------
   const todayKey = now.toISOString().slice(0, 10);
   const morningReminderId = `duty:${todayKey}`;
