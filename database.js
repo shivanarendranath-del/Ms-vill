@@ -168,7 +168,8 @@ const ICONS = {
   dailyExpenses: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 12.5v5M10 13.3h4a1.2 1.2 0 0 1 0 2.4h-4a1.2 1.2 0 0 0 0 2.4h4"/></svg>`,
   roommates: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"/><circle cx="17" cy="9" r="2.6"/><path d="M14.8 14.2c2.4.3 4.2 2.4 4.2 5.3"/></svg>`,
   gallery: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5.5-5.5a1.5 1.5 0 0 0-2.1 0L4 19"/></svg>`,
-  bell: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`
+  bell: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>`,
+  reminders: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6M19.4 6.6l1.4-1.4M4.6 6.6L3.2 5.2"/></svg>`
 };
 
 // --- Appearance: themes & fonts ---------------------------------------
@@ -276,6 +277,46 @@ const THEMES = {
       "--modal-bg":"rgba(14,16,26,0.94)",
       "--body-bg":"radial-gradient(circle at 12% 8%, rgba(108,124,246,.16), transparent 42%), radial-gradient(circle at 88% 18%, rgba(108,124,246,.08), transparent 45%), linear-gradient(160deg, #171A2C 0%, #10121E 45%, #131526 100%)"
     }
+  },
+  peach: {
+    label: "Sunrise Peach",
+    vars: {
+      "--bg":"#FFF8F0", "--panel":"rgba(255,255,255,0.64)", "--panel-2":"rgba(255,145,77,0.14)",
+      "--line":"rgba(255,255,255,0.55)", "--ink":"#4A2A12", "--accent":"#FF914D",
+      "--accent-soft":"#FFC79A", "--muted":"#9A7156", "--danger":"#C0392B", "--good":"#1B8A5A",
+      "--modal-bg":"rgba(255,255,255,0.94)",
+      "--body-bg":"radial-gradient(circle at 12% 8%, rgba(255,145,77,.20), transparent 42%), radial-gradient(circle at 88% 18%, rgba(74,42,18,.08), transparent 45%), linear-gradient(160deg, #FFEEDD 0%, #FFF8F0 40%, #FFEFE0 100%)"
+    }
+  },
+  mint: {
+    label: "Fresh Mint",
+    vars: {
+      "--bg":"#EFFBF7", "--panel":"rgba(255,255,255,0.64)", "--panel-2":"rgba(30,184,140,0.14)",
+      "--line":"rgba(255,255,255,0.55)", "--ink":"#0C3A2D", "--accent":"#1EB88C",
+      "--accent-soft":"#8FE2C7", "--muted":"#4E7C6D", "--danger":"#C0392B", "--good":"#1EB88C",
+      "--modal-bg":"rgba(255,255,255,0.94)",
+      "--body-bg":"radial-gradient(circle at 12% 8%, rgba(30,184,140,.18), transparent 42%), radial-gradient(circle at 88% 18%, rgba(12,58,45,.08), transparent 45%), linear-gradient(160deg, #E4F9F1 0%, #EFFBF7 40%, #E6F6F2 100%)"
+    }
+  },
+  neon: {
+    label: "Neon Nights",
+    vars: {
+      "--bg":"#0B0F1A", "--panel":"rgba(20,24,38,0.70)", "--panel-2":"rgba(0,229,255,0.14)",
+      "--line":"rgba(0,229,255,0.30)", "--ink":"#EAFBFF", "--accent":"#00E5FF",
+      "--accent-soft":"#7CF0FF", "--muted":"#9AB4C4", "--danger":"#FF5C8A", "--good":"#39FF9D",
+      "--modal-bg":"rgba(10,13,22,0.95)",
+      "--body-bg":"radial-gradient(circle at 12% 8%, rgba(0,229,255,.18), transparent 42%), radial-gradient(circle at 88% 18%, rgba(255,92,138,.10), transparent 45%), linear-gradient(160deg, #10141F 0%, #0B0F1A 45%, #0D1120 100%)"
+    }
+  },
+  ruby: {
+    label: "Ruby Red",
+    vars: {
+      "--bg":"#1B0E10", "--panel":"rgba(42,20,22,0.66)", "--panel-2":"rgba(224,55,68,0.16)",
+      "--line":"rgba(224,55,68,0.30)", "--ink":"#FBEAEA", "--accent":"#E03744",
+      "--accent-soft":"#F19AA1", "--muted":"#C9A3A6", "--danger":"#FF8F7E", "--good":"#63D6A4",
+      "--modal-bg":"rgba(20,10,11,0.94)",
+      "--body-bg":"radial-gradient(circle at 12% 8%, rgba(224,55,68,.18), transparent 42%), radial-gradient(circle at 88% 18%, rgba(224,55,68,.08), transparent 45%), linear-gradient(160deg, #241214 0%, #1B0E10 45%, #1E1012 100%)"
+    }
   }
 };
 const DEFAULT_THEME = "gold";
@@ -291,7 +332,18 @@ const FONTS = {
   modern:  { label:"Modern (Poppins)", display:"'Poppins', sans-serif", body:"'Poppins', sans-serif", googleFamily:"Poppins:wght@500;600;700;800" },
   nunito:  { label:"Rounded (Nunito)", display:"'Nunito', sans-serif", body:"'Nunito', sans-serif", googleFamily:"Nunito:wght@600;700;800" },
   classic: { label:"Classic (Cormorant + Work Sans)", display:"'Cormorant Garamond', serif", body:"'Work Sans', sans-serif", googleFamily:"Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Work+Sans:wght@600;700;800" },
-  elegant: { label:"Elegant (Playfair + Nunito)", display:"'Playfair Display', serif", body:"'Nunito', sans-serif", googleFamily:"Playfair+Display:wght@700;800&family=Nunito:wght@600;700;800" }
+  elegant: { label:"Elegant (Playfair + Nunito)", display:"'Playfair Display', serif", body:"'Nunito', sans-serif", googleFamily:"Playfair+Display:wght@700;800&family=Nunito:wght@600;700;800" },
+  // Added from the house's font mood-board (bestfreefonts.com picks) —
+  // each is a real, free Google Font, loaded on demand like the others.
+  murecho:   { label:"Murecho", display:"'Murecho', sans-serif", body:"'Murecho', sans-serif", googleFamily:"Murecho:wght@500;600;700;800" },
+  climacrisis: { label:"Climate Crisis (Display)", display:"'Climate Crisis', sans-serif", body:"'Host Grotesk', sans-serif", googleFamily:"Climate+Crisis&family=Host+Grotesk:wght@500;600;700;800" },
+  hostgrotesk: { label:"Host Grotesk", display:"'Host Grotesk', sans-serif", body:"'Host Grotesk', sans-serif", googleFamily:"Host+Grotesk:wght@500;600;700;800" },
+  gabarito:  { label:"Gabarito", display:"'Gabarito', sans-serif", body:"'Gabarito', sans-serif", googleFamily:"Gabarito:wght@600;700;800;900" },
+  familjen:  { label:"Familjen Grotesk", display:"'Familjen Grotesk', sans-serif", body:"'Familjen Grotesk', sans-serif", googleFamily:"Familjen+Grotesk:wght@500;600;700" },
+  figtree:   { label:"Figtree", display:"'Figtree', sans-serif", body:"'Figtree', sans-serif", googleFamily:"Figtree:wght@500;600;700;800" },
+  bricolage: { label:"Bricolage Grotesque", display:"'Bricolage Grotesque', sans-serif", body:"'Bricolage Grotesque', sans-serif", googleFamily:"Bricolage+Grotesque:wght@600;700;800" },
+  nationalpark: { label:"National Park", display:"'National Park', sans-serif", body:"'National Park', sans-serif", googleFamily:"National+Park:wght@500;600;700;800" },
+  funneldisplay: { label:"Funnel Display (Bold)", display:"'Funnel Display', sans-serif", body:"'Figtree', sans-serif", googleFamily:"Funnel+Display:wght@600;700;800&family=Figtree:wght@600;700" }
 };
 const DEFAULT_FONT = "clean";
 
@@ -505,11 +557,14 @@ let state = {
   transactions: [],   // self-reported rent payment log: { id, username, amount, status, note, photoId, createdAt }
   foodMenu: null,      // string — "Today's Menu", shown as the Food column on Room Expenses
   foodPoll: null,      // { question, votes:{username:"yes"|"no"} } — everyone-can-vote daily-food poll
+  reminders: [],       // { id, title, notes, time (ISO), target:"all"|"me", by, sent } — any resident can add one
+  chat: [],            // { id, from, type:"text"|"image"|"audio"|"sticker", text, mediaId, createdAt } — House Chat
   session: null,   // {username}
   view: "login",
   roomId: null,
   pendingOtp: null, // {phone, code, expiresAt}
-  photoCache: {}   // photoId -> data URL, populated on demand by loadPhoto()
+  photoCache: {},  // photoId -> data URL, populated on demand by loadPhoto()
+  chatMediaCache: {} // chat mediaId -> data URL, populated on demand by loadChatMedia()
 };
 
 // --- Shared storage layer -------------------------------------------------
@@ -625,6 +680,26 @@ async function sappend(key, item, idField){
   }
 }
 
+// Atomically removes one item (by id) from a shared list — the same
+// compare-and-swap safety as sappend, just for deletes. Mirrors the
+// server's "remove" action in netlify/functions/data.js.
+async function sremove(key, idField, idValue){
+  try{
+    const res = await fetch(DATA_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "remove", key, idField, idValue })
+    });
+    if(!res.ok) return null;
+    const { value } = await res.json();
+    if(value !== undefined){ localStorage.setItem(key, JSON.stringify(value)); }
+    return value;
+  }catch(e){
+    console.error("sremove (offline):", e);
+    return null;
+  }
+}
+
 // --- Photo storage, kept separate from the records that reference them ---
 // Early on, photos were embedded as base64 directly inside the shared
 // members/daily-expenses/complaints arrays. That meant every single save —
@@ -637,6 +712,22 @@ async function sappend(key, item, idField){
 // pile up.
 function savePhoto(id, dataUrl){
   return sset(`ms-villa:photo:${id}`, dataUrl);
+}
+// House Chat media (photos + voice notes) uses the exact same "own small
+// key" pattern as everything else — the shared ms-villa:chat message list
+// only ever stores a short mediaId string, never the actual bytes, so it
+// never risks tripping the shared function's payload-size limit no matter
+// how many photos/voice notes pile up.
+function saveChatMedia(id, dataUrl){
+  return sset(`ms-villa:chat-media:${id}`, dataUrl);
+}
+async function loadChatMedia(id){
+  if(!id) return null;
+  if(!state.chatMediaCache) state.chatMediaCache = {};
+  if(state.chatMediaCache[id]) return state.chatMediaCache[id];
+  const v = await sget(`ms-villa:chat-media:${id}`);
+  if(v) state.chatMediaCache[id] = v;
+  return v;
 }
 async function loadPhoto(id){
   if(!id) return null;
@@ -687,14 +778,14 @@ async function loadCore(){
     "ms-villa:ledger", "ms-villa:meetings", "ms-villa:support-phone",
     "ms-villa:daily-expenses", "ms-villa:gallery", NOTIF_LOG_KEY,
     "ms-villa:rent-info", "ms-villa:transactions", "ms-villa:food-menu",
-    "ms-villa:food-poll"
+    "ms-villa:food-poll", "ms-villa:reminders", "ms-villa:chat"
   ];
   const v = await sgetMany(KEYS);
   const [
     members, rooms, vesselOverrides, cookingOverrides, vesselProofs, complaints,
     cookingStaff, waterDuty, weeklyVesselDuty, ledger, meetings, supportPhone,
     dailyExpenses, gallery, notifications, rentInfo, transactions,
-    foodMenu, foodPoll
+    foodMenu, foodPoll, reminders, chat
   ] = KEYS.map(k => v[k]);
 
   state.members = members || DEFAULT_MEMBERS.map(m=>({...m, password:DEFAULT_PASSWORD}));
@@ -725,6 +816,8 @@ async function loadCore(){
   state.foodMenu = (foodMenu===null || foodMenu===undefined) ? DEFAULT_FOOD_MENU : foodMenu;
   state.foodPoll = foodPoll || JSON.parse(JSON.stringify(DEFAULT_FOOD_POLL));
   if(!state.foodPoll.votes) state.foodPoll.votes = {};
+  state.reminders = reminders || [];
+  state.chat = chat || [];
 
   // Anything that came back empty gets seeded back to the server so future
   // loads (and other people's devices) see the same defaults. Fired without

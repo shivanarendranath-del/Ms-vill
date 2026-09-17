@@ -42,12 +42,12 @@
     -webkit-font-smoothing:antialiased;
     transition: background .25s ease, color .25s ease;
   }
-  h1,h2,h3,.serif{ font-family:var(--font-display,'Cormorant Garamond', serif); font-weight:800; letter-spacing:.01em; }
+  h1,h2,h3,.serif{ font-family:var(--font-display,'Cormorant Garamond', serif); font-weight:900; letter-spacing:.01em; }
   #app{ max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; padding-bottom:40px; position:relative; border-top:6px solid var(--accent); }
 
   .photo-hero{ position:relative; overflow:hidden; border-bottom:1px solid var(--line); }
   .hero-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(5px) saturate(1.08) brightness(0.97); transform:scale(1.15); }
-  .hero-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(14,13,11,.35) 0%, rgba(14,13,11,.80) 55%, rgba(14,13,11,.96) 100%); }
+  .hero-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, color-mix(in srgb, var(--bg) 35%, transparent) 0%, color-mix(in srgb, var(--bg) 80%, transparent) 55%, color-mix(in srgb, var(--bg) 96%, transparent) 100%); }
   .hero-inner{ position:relative; z-index:2; }
 
   .crest{ text-align:center; padding:44px 20px 26px; }
@@ -57,7 +57,7 @@
     display:flex; align-items:center; justify-content:center; color:var(--ink);
   }
   .crest .mark svg{ width:22px; height:22px; stroke:var(--ink); fill:none; stroke-width:1.4; }
-  .crest h1{ font-size:38px; font-style:italic; font-weight:800; margin:0; color:var(--ink); }
+  .crest h1{ font-size:38px; font-style:normal; font-weight:900; margin:0; color:var(--ink); letter-spacing:-.01em; }
   .crest .sub{ color:var(--accent-soft); font-weight:800; font-size:11px; margin-top:8px; letter-spacing:.16em; text-transform:uppercase; }
   .dots{ display:flex; gap:6px; justify-content:center; margin-top:16px; }
   .dots span{ width:5px; height:5px; border-radius:50%; background:var(--accent-soft); }
@@ -91,7 +91,7 @@
   .topbar .who b{ color:#fff; font-weight:700; }
 
   .house-title{ text-align:center; padding:6px 18px 20px; }
-  .house-title h1{ font-size:32px; font-style:italic; margin:0 0 4px; }
+  .house-title h1{ font-size:32px; font-style:normal; font-weight:900; margin:0 0 4px; letter-spacing:-.01em; }
   .house-title .sub{ color:var(--muted); font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
 
   .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 18px; }
@@ -114,13 +114,13 @@
 
   .duty-strip{ margin:16px 18px 4px; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:4px; padding:14px 16px; }
   .duty-strip .lbl{ font-size:11px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; font-weight:700; }
-  .duty-strip .name{ font-size:20px; font-style:italic; font-family:var(--font-display,'Cormorant Garamond',serif); margin-top:2px; font-weight:700; }
+  .duty-strip .name{ font-size:20px; font-style:normal; font-family:var(--font-display,'Cormorant Garamond',serif); margin-top:2px; font-weight:800; }
   .duty-strip .sub2{ font-size:11px; color:var(--muted); margin-top:8px; }
 
   .dues-card{ text-align:left; border-left:3px solid var(--accent); }
   .dues-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .dues-label{ font-size:11px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; font-weight:700; }
-  .dues-amount{ font-family:var(--font-display,'Cormorant Garamond',serif); font-weight:700; font-size:34px; color:var(--accent); margin:6px 0 2px; }
+  .dues-amount{ font-family:var(--font-display,'Cormorant Garamond',serif); font-weight:800; font-size:34px; color:var(--accent); margin:6px 0 2px; letter-spacing:-.01em; }
   .dues-note{ font-size:12.5px; color:var(--muted); font-weight:600; }
 
   .nav-row{ display:flex; gap:10px; padding:6px 18px 18px; }
@@ -151,7 +151,7 @@
 
   .modal-bg{ position:fixed; inset:0; background:rgba(22,39,63,.42); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
   .modal{ background:var(--modal-bg, rgba(255,255,255,0.92)); color:var(--ink); backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%); border:1px solid var(--line); border-radius:20px 20px 0 0; padding:22px 18px 26px; width:100%; max-width:520px; max-height:88vh; overflow-y:auto; }
-  .modal h3{ margin:0 0 14px; font-size:20px; font-style:italic; }
+  .modal h3{ margin:0 0 14px; font-size:20px; font-style:normal; font-weight:800; }
   .chip-select{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
   .chip{ padding:8px 12px; border:1px solid var(--line); border-radius:20px; font-size:13px; color:var(--muted); cursor:pointer; }
   .chip.on{ border-color:var(--ink); color:var(--ink); background:var(--panel-2); }
@@ -167,13 +167,13 @@
   .weekday-row .day{ font-size:13px; color:var(--muted); width:90px; }
   .weekday-row.today{ color:var(--ink); }
   .weekday-row .who{ font-size:14px; text-align:right; flex:1; }
-  .weekday-row.today .who{ color:var(--ink); font-family:var(--font-display,'Cormorant Garamond',serif); font-style:italic; font-size:16px; }
+  .weekday-row.today .who{ color:var(--ink); font-family:var(--font-display,'Cormorant Garamond',serif); font-style:normal; font-weight:800; font-size:16px; }
 
   .pay-btn-row{ display:flex; gap:10px; padding:0 18px 6px; flex-wrap:wrap; }
   .pay-app-btn{ flex:1; min-width:100px; background:var(--panel); border:1px solid var(--line); color:var(--ink); padding:14px 8px; border-radius:6px; text-align:center; font-size:12px; text-decoration:none; display:block; box-shadow:0 2px 8px rgba(5,42,61,.05); }
-  .pay-app-btn b{ display:block; font-size:14px; margin-bottom:2px; color:var(--ink); font-style:italic; font-family:var(--font-display,'Cormorant Garamond',serif); }
+  .pay-app-btn b{ display:block; font-size:14px; margin-bottom:2px; color:var(--ink); font-style:normal; font-weight:800; font-family:var(--font-display,'Cormorant Garamond',serif); }
   .upi-box{ margin:0 18px 16px; padding:16px 18px; background:var(--panel-2); border:1px dashed var(--accent-soft); border-radius:6px; font-size:13px; text-align:center; }
-  .upi-box .id{ color:var(--ink); font-family:var(--font-display,'Cormorant Garamond',serif); font-style:italic; font-size:18px; margin-top:4px; word-break:break-all; }
+  .upi-box .id{ color:var(--ink); font-family:var(--font-display,'Cormorant Garamond',serif); font-style:normal; font-weight:800; font-size:18px; margin-top:4px; word-break:break-all; }
 
   .ledger-table{ width:100%; border-collapse:collapse; font-size:13px; }
   .ledger-table th{ text-align:left; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:0 6px 8px; border-bottom:1px solid var(--line); }
@@ -181,17 +181,17 @@
   .ledger-table td.num{ text-align:right; font-family:var(--font-body,'Work Sans',sans-serif); }
   .ledger-table tr:last-child td{ border-bottom:none; }
   .ledger-total{ display:flex; justify-content:space-between; padding:14px 18px; font-size:14px; border-top:1px solid var(--line); margin-top:4px; }
-  .ledger-total b{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:italic; font-size:17px; }
+  .ledger-total b{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:normal; font-weight:800; font-size:17px; }
 
   .complaint-card{ background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin:0 18px 12px; box-shadow:0 2px 8px rgba(5,42,61,.05); }
   .complaint-card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .complaint-card .cat{ font-size:14px; color:var(--ink); font-weight:500; }
+  .complaint-card .cat{ font-size:14px; color:var(--ink); font-weight:700; }
   .complaint-card .desc{ font-size:13px; color:var(--ink); opacity:.9; margin-top:6px; line-height:1.4; }
   .complaint-card .meta{ font-size:11px; color:var(--muted); margin-top:8px; }
 
   .meeting-card{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--good); border-radius:6px; padding:14px 16px; margin:0 18px 12px; box-shadow:0 2px 8px rgba(5,42,61,.05); }
   .meeting-card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .meeting-card .title{ font-size:15px; color:var(--ink); font-weight:700; }
+  .meeting-card .title{ font-size:15px; color:var(--ink); font-weight:800; }
   .meeting-card .meta{ font-size:11.5px; color:var(--muted); margin-top:4px; }
   .meeting-card .join-btn{ background:var(--good); color:#fff; padding:8px 14px; border-radius:20px; font-size:12px; text-decoration:none; display:inline-block; margin-top:10px; }
   .meeting-platform-pill{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; padding:3px 8px; border-radius:20px; background:var(--panel-2); color:var(--accent); font-weight:700; }
@@ -205,7 +205,7 @@
   .roommate-card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px 12px 14px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 2px 8px rgba(5,42,61,.05); }
   .roommate-photo{ width:84px; height:84px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); margin-bottom:10px; }
   .roommate-photo-empty{ width:84px; height:84px; border-radius:50%; background:var(--panel-2); border:2px dashed var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--muted); margin-bottom:10px; font-family:var(--font-display,'Cormorant Garamond',serif); }
-  .roommate-name{ font-size:14.5px; color:var(--ink); font-weight:700; }
+  .roommate-name{ font-size:14.5px; color:var(--ink); font-weight:800; }
   .roommate-edu{ font-size:11.5px; color:var(--muted); margin-top:3px; }
   .roommate-edit{ margin-top:10px; font-size:11px; color:var(--accent); font-weight:700; cursor:pointer; }
 
@@ -235,7 +235,7 @@
   .spinner{ width:38px; height:38px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:ms-spin .8s linear infinite; }
   .spinner.sm{ width:16px; height:16px; border-width:2px; }
   @keyframes ms-spin{ to{ transform:rotate(360deg); } }
-  .boot-screen .boot-title{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:italic; font-size:24px; color:var(--ink); }
+  .boot-screen .boot-title{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:normal; font-weight:900; font-size:24px; color:var(--ink); }
   .boot-screen .boot-msg{ font-size:12.5px; color:var(--muted); max-width:260px; }
   .sync-pill{ display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
 
@@ -243,12 +243,64 @@
   .qr-box{ margin:0 18px 16px; padding:18px; background:var(--panel); border:1px solid var(--line); border-radius:16px; text-align:center; }
   .qr-box img{ width:200px; height:200px; max-width:100%; object-fit:contain; border-radius:8px; background:#fff; padding:8px; }
   .txn-row{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin:0 18px 10px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-  .txn-row .amt{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:italic; font-size:18px; color:var(--ink); }
+  .txn-row .amt{ font-family:var(--font-display,'Cormorant Garamond',serif); font-style:normal; font-weight:800; font-size:18px; color:var(--ink); }
   .txn-row .meta{ font-size:11px; color:var(--muted); margin-top:2px; }
   .txn-row .who{ font-size:12px; color:var(--ink); font-weight:700; }
   .status-pill.status-success{ background:rgba(27,138,90,.12); color:var(--good); }
   .status-pill.status-failed{ background:rgba(224,107,92,.14); color:var(--danger); }
   .status-pill.status-pending{ background:rgba(212,168,83,.16); color:var(--accent); }
+
+  /* --- Decent, tasteful motion -------------------------------------------
+     A screen never "pops" into place with zero feedback, and a screen never
+     thrashes with excess motion either — one soft fade+rise on entry, a
+     gentle press-down on tap, nothing that fights the person's thumb. */
+  @keyframes ms-rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes ms-pop{ from{ opacity:0; transform:scale(.92); } to{ opacity:1; transform:scale(1); } }
+  @keyframes ms-pulse{ 0%,100%{ box-shadow:0 4px 14px rgba(5,42,61,.3), 0 0 0 0 color-mix(in srgb, var(--good) 55%, transparent);} 50%{ box-shadow:0 4px 14px rgba(5,42,61,.3), 0 0 0 8px color-mix(in srgb, var(--good) 0%, transparent);} }
+  .card, .room-tile, .quick-tile, .duty-strip, .dues-card, .complaint-card,
+  .meeting-card, .roommate-card, .txn-row, .qr-box, .info-block{
+    animation: ms-rise .38s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .grid .room-tile:nth-child(2), .grid .room-tile:nth-child(4), .grid .room-tile:nth-child(6){ animation-delay:.04s; }
+  .roommate-grid .roommate-card:nth-child(2n){ animation-delay:.05s; }
+  .modal{ animation: ms-rise .28s cubic-bezier(.2,.7,.3,1) both; }
+  .modal-bg{ animation: ms-pop .18s ease both; }
+  button, .quick-tile, .room-tile, .roommate-card{ transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease; }
+  button:active, .quick-tile:active, .room-tile:active{ transform: scale(.96); }
+  .chat-fab{ animation: ms-pulse 2.6s ease-in-out infinite; }
+  .chat-fab:active{ transform:scale(.9); }
+  a, .roommate-edit, .status-pill{ transition: color .15s ease, background .15s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .card,.room-tile,.quick-tile,.duty-strip,.dues-card,.complaint-card,.meeting-card,
+    .roommate-card,.txn-row,.qr-box,.info-block,.modal,.modal-bg,.chat-fab{ animation:none !important; }
+  }
+
+  /* --- House Chat (WhatsApp-style group chat) ---------------------------- */
+  .chat-screen{ display:flex; flex-direction:column; height:calc(100vh - 62px); }
+  .chat-thread{ flex:1; overflow-y:auto; padding:14px 12px 6px; display:flex; flex-direction:column; gap:10px; }
+  .chat-day-sep{ text-align:center; font-size:11px; color:var(--muted); margin:8px 0 2px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+  .chat-bubble-row{ display:flex; flex-direction:column; max-width:78%; animation: ms-rise .22s ease both; }
+  .chat-bubble-row.me{ align-self:flex-end; align-items:flex-end; }
+  .chat-bubble-row.them{ align-self:flex-start; align-items:flex-start; }
+  .chat-sender{ font-size:11px; font-weight:800; color:var(--accent); margin:0 4px 3px; }
+  .chat-bubble{ padding:9px 12px; border-radius:16px; font-size:14px; line-height:1.4; word-break:break-word; box-shadow:0 2px 8px rgba(5,42,61,.08); }
+  .chat-bubble-row.me .chat-bubble{ background:var(--accent); color:#16273F; border-bottom-right-radius:4px; font-weight:600; }
+  .chat-bubble-row.them .chat-bubble{ background:var(--panel); border:1px solid var(--line); color:var(--ink); border-bottom-left-radius:4px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .chat-bubble img.chat-img{ max-width:220px; max-height:260px; border-radius:12px; display:block; object-fit:cover; }
+  .chat-bubble audio{ max-width:220px; height:36px; }
+  .chat-bubble.sticker{ background:transparent !important; border:none !important; box-shadow:none; font-size:44px; padding:2px; }
+  .chat-time{ font-size:10px; color:var(--muted); margin-top:3px; }
+  .chat-inputbar{ display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--panel); border-top:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+  .chat-inputbar input[type=text]{ flex:1; margin:0; border-radius:22px; padding:11px 16px; }
+  .chat-icon-btn{ width:40px; height:40px; min-width:40px; border-radius:50%; background:var(--panel-2); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; color:var(--ink); font-size:18px; }
+  .chat-icon-btn.rec{ background:var(--danger); color:#fff; }
+  .chat-icon-btn svg{ width:19px; height:19px; stroke:currentColor; fill:none; }
+  .chat-send-btn{ width:42px; height:42px; min-width:42px; border-radius:50%; background:var(--good); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .chat-send-btn svg{ width:19px; height:19px; fill:#fff; }
+  .sticker-panel{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:10px 12px; background:var(--panel); border-top:1px solid var(--line); max-height:160px; overflow-y:auto; }
+  .sticker-panel span{ font-size:26px; text-align:center; cursor:pointer; padding:4px; border-radius:8px; }
+  .sticker-panel span:active{ background:var(--panel-2); }
+  .chat-empty{ text-align:center; color:var(--muted); font-size:13px; padding:40px 20px; }
 </style>
 </head>
 <body>

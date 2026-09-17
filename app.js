@@ -75,6 +75,8 @@ function renderView(){
   if(state.view==="roommates") return renderRoommates();
   if(state.view==="gallery") return renderGallery();
   if(state.view==="notifications") return renderNotifications();
+  if(state.view==="reminders") return renderReminders();
+  if(state.view==="chat") return renderChat();
 }
 
 // In-app Notification Center — every announcement, meeting, complaint, or
@@ -195,8 +197,10 @@ function renderHome(){
     {id:"rent", name:"Rent & Pay"},
     {id:"complaints", name:"Complaints"},
     {id:"meetings", name:"Meetings"},
+    {id:"reminders", name:"Reminders"},
     {id:"roommates", name:"Roommates"},
-    {id:"gallery", name:"Photos"}
+    {id:"gallery", name:"Photos"},
+    {id:"chat", name:"House Chat"}
   ];
   const quickTiles = quickLinks.map(q=>`
     <div class="quick-tile" data-nav2="${q.id}">${ICONS[q.id]}<div class="name">${q.name}</div></div>
@@ -1436,6 +1440,318 @@ function openMeetingModal(){
   };
 }
 
+// --- House Chat ------------------------------------------------------------
+// A single shared group thread, visible to every resident — text, photos,
+// voice notes, and stickers, all broadcast to the whole house the moment
+// they're sent (there's only one house, so "send to everyone" is just
+// "post to the thread"). Messages are tiny (sappend keeps the shared list
+// safe against concurrent sends); any actual photo/audio bytes live under
+// their own small key via saveChatMedia/loadChatMedia, same pattern the
+// rest of the app already uses for photos.
+const CHAT_STICKERS = ["😀","😂","😍","👍","🙏","🎉","❤️","🔥","😢","😮","👏","🙌","🤝","🍛","🧹","🧽","💧","🛏️","🏠","☕","🎂","😴","🤣","😎"];
+let chatRenderedIds = new Set();
+let chatRecorder = null, chatRecordedChunks = [], chatIsRecording = false;
+
+function chatBubbleHtml(msg){
+  const mine = msg.from === state.session.username;
+  const senderName = nameFor(msg.from, state.members);
+  const time = new Date(msg.createdAt).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  let inner;
+  if(msg.type === "image"){
+    const src = state.chatMediaCache ? state.chatMediaCache[msg.mediaId] : null;
+    inner = src ? `<img class="chat-img" src="${src}">` : `<span style="font-size:12px;">Loading photo…</span>`;
+  } else if(msg.type === "audio"){
+    const src = state.chatMediaCache ? state.chatMediaCache[msg.mediaId] : null;
+    inner = src ? `<audio controls src="${src}"></audio>` : `<span style="font-size:12px;">Loading voice note…</span>`;
+  } else if(msg.type === "sticker"){
+    inner = msg.text;
+  } else {
+    inner = (msg.text||"").replace(/</g,"&lt;");
+  }
+  return `
+    <div class="chat-bubble-row ${mine?"me":"them"}" data-msg-id="${msg.id}">
+      ${!mine ? `<div class="chat-sender">${senderName}</div>` : ""}
+      <div class="chat-bubble${msg.type==="sticker"?" sticker":""}">${inner}</div>
+      <div class="chat-time">${time}</div>
+    </div>
+  `;
+}
+
+async function ensureChatMediaLoaded(messages){
+  const needed = messages.filter(m=> m.mediaId && (!state.chatMediaCache || !state.chatMediaCache[m.mediaId]));
+  if(!needed.length) return;
+  await Promise.all(needed.map(m=> loadChatMedia(m.mediaId)));
+}
+
+function isThreadNearBottom(thread){
+  return thread.scrollHeight - thread.scrollTop - thread.clientHeight < 120;
+}
+
+async function renderChat(){
+  const messages = [...state.chat];
+  await ensureChatMediaLoaded(messages);
+
+  let lastDay = null;
+  const rows = messages.map(m=>{
+    const day = new Date(m.createdAt).toDateString();
+    let sep = "";
+    if(day !== lastDay){ sep = `<div class="chat-day-sep">${day===new Date().toDateString() ? "Today" : day}</div>`; lastDay = day; }
+    return sep + chatBubbleHtml(m);
+  }).join("");
+
+  app.innerHTML = `
+    ${topbar("House Chat","home")}
+    <div class="chat-screen">
+      <div class="chat-thread" id="chat-thread">
+        ${rows || `<div class="chat-empty">No messages yet — say hi to the house 👋</div>`}
+      </div>
+      <div class="sticker-panel" id="sticker-panel" style="display:none;">
+        ${CHAT_STICKERS.map(s=>`<span data-sticker="${s}">${s}</span>`).join("")}
+      </div>
+      <div class="chat-inputbar">
+        <input type="file" accept="image/*" id="chat-photo-file" style="display:none;">
+        <div class="chat-icon-btn" id="chat-photo-btn" title="Photo">📷</div>
+        <div class="chat-icon-btn" id="chat-sticker-btn" title="Stickers">😊</div>
+        <input type="text" id="chat-text" placeholder="Message the house...">
+        <div class="chat-icon-btn" id="chat-mic-btn" title="Voice message">🎤</div>
+        <div class="chat-send-btn" id="chat-send-btn" title="Send">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </div>
+      </div>
+    </div>
+  `;
+  chatRenderedIds = new Set(messages.map(m=>m.id));
+  const thread = $("#chat-thread");
+  thread.scrollTop = thread.scrollHeight;
+
+  $("#chat-photo-btn").onclick = ()=> $("#chat-photo-file").click();
+  $("#chat-photo-file").onchange = async ()=>{
+    const f = $("#chat-photo-file").files[0];
+    if(!f) return;
+    try{
+      const dataUrl = await readAndCompressImage(f, 1280, 0.85);
+      await sendChatMessage({ type:"image", dataUrl });
+    }catch(e){ alert("That photo couldn't be sent. Try a different one."); }
+    $("#chat-photo-file").value = "";
+  };
+
+  $("#chat-sticker-btn").onclick = ()=>{
+    const panel = $("#sticker-panel");
+    panel.style.display = panel.style.display === "none" ? "grid" : "none";
+  };
+  app.querySelectorAll("[data-sticker]").forEach(el=>{
+    el.onclick = async ()=>{
+      $("#sticker-panel").style.display = "none";
+      await sendChatMessage({ type:"sticker", text: el.getAttribute("data-sticker") });
+    };
+  });
+
+  $("#chat-send-btn").onclick = sendChatTextFromInput;
+  $("#chat-text").onkeydown = (e)=>{ if(e.key==="Enter") sendChatTextFromInput(); };
+
+  $("#chat-mic-btn").onclick = toggleChatRecording;
+}
+
+async function sendChatTextFromInput(){
+  const input = $("#chat-text");
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = "";
+  await sendChatMessage({ type:"text", text });
+}
+
+async function toggleChatRecording(){
+  const btn = $("#chat-mic-btn");
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    alert("Voice messages aren't supported on this browser/device.");
+    return;
+  }
+  if(!chatIsRecording){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      chatRecordedChunks = [];
+      chatRecorder = new MediaRecorder(stream);
+      chatRecorder.ondataavailable = (e)=>{ if(e.data.size) chatRecordedChunks.push(e.data); };
+      chatRecorder.onstop = async ()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        const blob = new Blob(chatRecordedChunks, { type: chatRecorder.mimeType || "audio/webm" });
+        const dataUrl = await new Promise((resolve,reject)=>{
+          const reader = new FileReader();
+          reader.onload = ()=> resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        await sendChatMessage({ type:"audio", dataUrl });
+      };
+      chatRecorder.start();
+      chatIsRecording = true;
+      btn.classList.add("rec");
+      btn.textContent = "⏹";
+    }catch(e){ alert("Couldn't access the microphone — check your browser permissions."); }
+  } else {
+    chatIsRecording = false;
+    btn.classList.remove("rec");
+    btn.textContent = "🎤";
+    if(chatRecorder && chatRecorder.state !== "inactive") chatRecorder.stop();
+  }
+}
+
+// opts: { type, text, dataUrl }. Media (image/audio) is uploaded to its own
+// small key first — the shared chat list only ever stores the short
+// mediaId, exactly like every other photo in this app.
+async function sendChatMessage(opts){
+  const id = "msg_" + Date.now() + Math.random().toString(36).slice(2,6);
+  let mediaId = null;
+  if(opts.dataUrl){
+    mediaId = `chat_${id}`;
+    const ok = await saveChatMedia(mediaId, opts.dataUrl);
+    if(!ok){ alert("Couldn't send — check your connection and try again."); return; }
+    if(!state.chatMediaCache) state.chatMediaCache = {};
+    state.chatMediaCache[mediaId] = opts.dataUrl;
+  }
+  const msg = {
+    id, from: state.session.username, type: opts.type,
+    text: opts.text || null, mediaId, createdAt: new Date().toISOString()
+  };
+  state.chat.push(msg); // optimistic local echo
+  const saved = await sappend("ms-villa:chat", msg, "id");
+  if(saved !== null) state.chat = saved;
+  renderChat();
+  const preview = opts.type==="image" ? "📷 Photo" : opts.type==="audio" ? "🎤 Voice message" : opts.type==="sticker" ? `${opts.text} Sticker` : opts.text;
+  notifyMembers("New message in House Chat", `${nameFor(state.session.username, state.members)}: ${preview}`);
+}
+
+// Called from syncNow's background poll (every 6s) while the person is
+// actually looking at the Chat screen — appends only the new messages
+// instead of re-rendering the whole thread, so it never yanks the scroll
+// position or an in-progress typed message out from under them.
+async function appendNewChatMessages(){
+  if(state.view !== "chat") return;
+  const thread = document.getElementById("chat-thread");
+  if(!thread) return;
+  const fresh = state.chat.filter(m=> !chatRenderedIds.has(m.id));
+  if(!fresh.length) return;
+  await ensureChatMediaLoaded(fresh);
+  const wasNearBottom = isThreadNearBottom(thread);
+  const empty = thread.querySelector(".chat-empty");
+  if(empty) empty.remove();
+  thread.insertAdjacentHTML("beforeend", fresh.map(chatBubbleHtml).join(""));
+  fresh.forEach(m=> chatRenderedIds.add(m.id));
+  if(wasNearBottom) thread.scrollTop = thread.scrollHeight;
+}
+
+// --- Reminders -----------------------------------------------------------
+// Any resident can set one: for themselves, or for the whole house. Saved
+// to the shared list (same safe-append pattern as meetings/complaints) so
+// everyone sees it, and picked up by the scheduled-reminders function
+// (server side) which fires an actual push at the chosen time.
+function renderReminders(){
+  const me = state.members.find(m=>m.username===state.session.username);
+  const now = Date.now();
+  const mine = (r)=> r.target!=="me" || r.by===state.session.username;
+  const visible = state.reminders.filter(mine);
+  const sorted = [...visible].sort((a,b)=> new Date(a.time) - new Date(b.time));
+  const upcoming = sorted.filter(r=> new Date(r.time).getTime() >= now - 5*60000);
+  const past = sorted.filter(r=> new Date(r.time).getTime() < now - 5*60000);
+
+  function card(r){
+    const when = new Date(r.time).toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
+    const canDel = me.admin || r.by === state.session.username;
+    return `
+      <div class="meeting-card">
+        <div class="top">
+          <div>
+            <div class="title">${r.title}</div>
+            <div class="meta">${when}</div>
+          </div>
+          <span class="meeting-platform-pill">${r.target==="me" ? "Just me" : "Everyone"}</span>
+        </div>
+        ${r.notes ? `<div class="meta" style="margin-top:6px;">${r.notes}</div>` : ""}
+        <div class="meta" style="margin-top:8px;">Set by ${nameFor(r.by, state.members)}${canDel ? ` · <span data-del-reminder="${r.id}" style="color:var(--danger); cursor:pointer;">Remove</span>` : ""}</div>
+      </div>
+    `;
+  }
+
+  app.innerHTML = `
+    ${topbar("Reminders","home")}
+    ${heroWrap("living", `
+      <div class="house-title" style="padding-top:0;">
+        <h1 style="font-size:26px;">Reminders</h1>
+        <div class="sub">Never forget a duty, bill, or meeting</div>
+      </div>
+    `)}
+    <div class="fab-add"><button class="btn-primary" id="add-reminder">+ Add Reminder</button></div>
+    <div class="section-title">Upcoming</div>
+    ${upcoming.length ? upcoming.map(card).join("") : `<div class="foot-note" style="padding:0 18px 18px;">No reminders yet.</div>`}
+    ${past.length ? `<div class="section-title">Past</div>${past.map(card).join("")}` : ""}
+  `;
+
+  $("#add-reminder").onclick = ()=> openReminderModal();
+  app.querySelectorAll("[data-del-reminder]").forEach(el=>{
+    el.onclick = async ()=>{
+      const id = el.getAttribute("data-del-reminder");
+      state.reminders = state.reminders.filter(r=>r.id!==id);
+      const saved = await sremove("ms-villa:reminders", "id", id);
+      if(saved !== null) state.reminders = saved;
+      renderReminders();
+    };
+  });
+}
+
+function openReminderModal(){
+  const wrap = document.createElement("div");
+  wrap.className = "modal-bg";
+  wrap.innerHTML = `
+    <div class="modal">
+      <h3>Add Reminder</h3>
+      <label>Title</label>
+      <input type="text" id="r-title" placeholder="e.g. Pay September rent">
+      <label>Date &amp; time</label>
+      <input type="text" id="r-time" placeholder="YYYY-MM-DDTHH:MM" onfocus="(this.type='datetime-local')">
+      <label>Notes (optional)</label>
+      <textarea id="r-notes" placeholder="Any extra detail"></textarea>
+      <label>Who should be reminded?</label>
+      <div class="chip-select">
+        <div class="chip on" data-target="all">Everyone</div>
+        <div class="chip" data-target="me">Just me</div>
+      </div>
+      <div class="error" id="r-error" style="display:none;"></div>
+      <button class="btn-primary" id="r-save">Save Reminder</button>
+      <button class="btn-ghost" id="r-cancel">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  let target = "all";
+  wrap.querySelectorAll("[data-target]").forEach(chip=>{
+    chip.onclick = ()=>{
+      wrap.querySelectorAll("[data-target]").forEach(c=>c.classList.remove("on"));
+      chip.classList.add("on");
+      target = chip.getAttribute("data-target");
+    };
+  });
+  $("#r-cancel").onclick = ()=> wrap.remove();
+  $("#r-save").onclick = async ()=>{
+    const title = $("#r-title").value.trim();
+    const time = $("#r-time").value;
+    const err = $("#r-error");
+    if(!title || !time){ err.style.display="block"; err.textContent="Title and date/time are required."; return; }
+    const reminder = {
+      id: "rem_" + Date.now(),
+      title,
+      notes: $("#r-notes").value.trim(),
+      time,
+      target,
+      by: state.session.username,
+      sent: false
+    };
+    state.reminders.push(reminder); // optimistic local echo
+    const saved = await sappend("ms-villa:reminders", reminder, "id");
+    if(saved !== null) state.reminders = saved;
+    wrap.remove();
+    renderReminders();
+  };
+}
+
 // Simple house directory — a photo, name, and education line for every
 // resident. Anyone signed in can view it; only an admin can edit a
 // person's entry (photo/name/education), from an "Edit" link on each card.
@@ -2009,7 +2325,8 @@ async function syncNow(manual){
       vesselOverrides: state.vesselOverrides, cookingOverrides: state.cookingOverrides,
       complaints: state.complaints, dailyExpenses: state.dailyExpenses,
       gallery: state.gallery, rooms: state.rooms,
-      rentInfo: state.rentInfo, transactions: state.transactions
+      rentInfo: state.rentInfo, transactions: state.transactions,
+      reminders: state.reminders
     });
     await loadCore();
     const after = JSON.stringify({
@@ -2019,7 +2336,8 @@ async function syncNow(manual){
       vesselOverrides: state.vesselOverrides, cookingOverrides: state.cookingOverrides,
       complaints: state.complaints, dailyExpenses: state.dailyExpenses,
       gallery: state.gallery, rooms: state.rooms,
-      rentInfo: state.rentInfo, transactions: state.transactions
+      rentInfo: state.rentInfo, transactions: state.transactions,
+      reminders: state.reminders
     });
     // Never re-render out from under someone mid-task: skip while they're on
     // the live attendance/photo screen, or whenever any modal (edit forms,
@@ -2027,7 +2345,8 @@ async function syncNow(manual){
     // able to silently close/reset an in-progress edit, which is the kind
     // of "lag/glitch" this app should never have.
     const modalOpen = !!document.querySelector(".modal-bg");
-    if(before !== after && state.view !== "room" && !modalOpen){ renderView(); renderChatFab(); }
+    if(before !== after && state.view !== "room" && state.view !== "chat" && !modalOpen){ renderView(); renderChatFab(); }
+    if(state.view === "chat") appendNewChatMessages();
     updateNotifBell();
   }catch(e){ /* offline or storage hiccup - ignore and try again next tick */ }
   syncing = false;
