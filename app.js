@@ -106,11 +106,13 @@ async function renderNotifications(){
   updateNotifBell();
 }
 
-// Floating "Chat with us" button - shown on every screen once signed in.
-// It hands off to WhatsApp using the support number set by an admin in Settings.
+// Floating "Chat with us" button - shown on every screen once signed in,
+// except the House Chat screen itself, where it would just float on top of
+// the in-app chat's own input bar and read as a confusing second "chat"
+// affordance right next to the real one.
 function renderChatFab(){
   let fab = document.getElementById("chat-fab");
-  if(!state.session){ if(fab) fab.remove(); return; }
+  if(!state.session || state.view === "chat"){ if(fab) fab.remove(); return; }
   if(!fab){
     fab = document.createElement("button");
     fab.id = "chat-fab";
