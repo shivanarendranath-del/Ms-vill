@@ -35,8 +35,8 @@ function notificationStatusLabel(){
   if(!pushSupported()) return "Push notifications aren't supported on this browser/device.";
   if(Notification.permission === "denied") return "Notifications are blocked for this site in your browser settings.";
   return notificationsEnabled()
-    ? "You'll get a notification for new meetings, complaints, and duty/expense changes."
-    : "Turn these on to get notified about meetings, complaints, and duty/expense changes.";
+    ? "You'll get a notification for meetings, complaints, duty/expense changes, and automatic payment & daily-duty reminders."
+    : "Turn these on to get notified about meetings, complaints, duty/expense changes, and automatic payment & daily-duty reminders.";
 }
 
 // Called once on every app load — doesn't prompt, just re-syncs local state
@@ -55,7 +55,7 @@ async function initNotifications(){
 async function askToEnableNotifications(){
   if(!pushSupported() || Notification.permission !== "default") return;
   if(localStorage.getItem("ms-villa:push-declined")) return;
-  const want = confirm("Get notified about new meetings, complaints, and duty changes?");
+  const want = confirm("Get notified about new meetings, complaints, duty changes, and payment/duty reminders?");
   if(want){ await subscribeToPush(); }
   else { localStorage.setItem("ms-villa:push-declined", "1"); }
 }

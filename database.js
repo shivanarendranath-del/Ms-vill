@@ -491,6 +491,13 @@ const inr = (n) => (n<0? "-₹" + Math.abs(n).toLocaleString("en-IN") : "₹" + 
 // saves.
 const IMAGE_SAFE_BYTES = 3 * 1024 * 1024; // ~3MB encoded, comfortably under serverless function request-size limits (base64 adds ~33% on top of this)
 
+// Videos and documents can't be shrunk the way a photo can (no re-encoding
+// at a lower quality/dimension), so instead of a "shrink until it fits"
+// loop like readAndCompressImage below, oversized files are just rejected
+// up front with a clear reason. Kept a little under IMAGE_SAFE_BYTES since
+// base64 still adds its usual ~33% on top when this goes out over sset.
+const RAW_FILE_SAFE_BYTES = 4 * 1024 * 1024; // ~4MB raw file size
+
 function dataUrlByteLength(dataUrl){
   const i = dataUrl.indexOf(",");
   const b64 = i === -1 ? dataUrl : dataUrl.slice(i + 1);
@@ -536,6 +543,43 @@ function readAndCompressImage(file, maxDim=1600, quality=0.92){
   });
 }
 
+// Plain "read the file as-is" for types that can't be re-encoded like an
+// image can (video, PDFs, Office docs, etc). Enforces RAW_FILE_SAFE_BYTES
+// up front — rejecting clearly here is much better than a silent failed
+// save (see sset's comment on oversized payloads).
+function readFileAsDataURL(file){
+  return new Promise((resolve, reject)=>{
+    if(file.size > RAW_FILE_SAFE_BYTES){
+      reject(new Error(`That file is too large to send here (max ${(RAW_FILE_SAFE_BYTES/1024/1024).toFixed(0)}MB).`));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error("Could not read that file."));
+    reader.onload = ()=> resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+// Short, human-friendly file size, e.g. "2.4 MB" / "180 KB".
+function formatFileSize(bytes){
+  if(!bytes && bytes !== 0) return "";
+  if(bytes < 1024) return `${bytes} B`;
+  if(bytes < 1024*1024) return `${(bytes/1024).toFixed(0)} KB`;
+  return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+}
+
+// Small emoji-per-extension so a document bubble/card is identifiable at a
+// glance without shipping a whole icon set for every office format.
+function fileIconFor(name){
+  const ext = (name||"").split(".").pop().toLowerCase();
+  if(ext==="pdf") return "📕";
+  if(["doc","docx"].includes(ext)) return "📝";
+  if(["xls","xlsx","csv"].includes(ext)) return "📊";
+  if(["ppt","pptx"].includes(ext)) return "📽️";
+  if(["zip","rar","7z"].includes(ext)) return "🗜️";
+  return "📄";
+}
+
 let state = {
   members: null,
   rooms: null,
@@ -558,7 +602,7 @@ let state = {
   foodMenu: null,      // string — "Today's Menu", shown as the Food column on Room Expenses
   foodPoll: null,      // { question, votes:{username:"yes"|"no"} } — everyone-can-vote daily-food poll
   reminders: [],       // { id, title, notes, time (ISO), target:"all"|"me", by, sent } — any resident can add one
-  chat: [],            // { id, from, type:"text"|"image"|"audio"|"sticker", text, mediaId, createdAt } — House Chat
+  chat: [],            // { id, from, type:"text"|"image"|"audio"|"video"|"file"|"sticker", text, mediaId, fileName, fileSize, createdAt } — House Chat
   session: null,   // {username}
   view: "login",
   roomId: null,

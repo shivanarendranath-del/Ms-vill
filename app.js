@@ -1442,12 +1442,13 @@ function openMeetingModal(){
 
 // --- House Chat ------------------------------------------------------------
 // A single shared group thread, visible to every resident — text, photos,
-// voice notes, and stickers, all broadcast to the whole house the moment
-// they're sent (there's only one house, so "send to everyone" is just
-// "post to the thread"). Messages are tiny (sappend keeps the shared list
-// safe against concurrent sends); any actual photo/audio bytes live under
-// their own small key via saveChatMedia/loadChatMedia, same pattern the
-// rest of the app already uses for photos.
+// voice notes, videos, documents, and stickers, all broadcast to the whole
+// house the moment they're sent (there's only one house, so "send to
+// everyone" is just "post to the thread"). Messages are tiny (sappend keeps
+// the shared list safe against concurrent sends); any actual photo/audio/
+// video/document bytes live under their own small key via
+// saveChatMedia/loadChatMedia, same pattern the rest of the app already
+// uses for photos.
 const CHAT_STICKERS = ["😀","😂","😍","👍","🙏","🎉","❤️","🔥","😢","😮","👏","🙌","🤝","🍛","🧹","🧽","💧","🛏️","🏠","☕","🎂","😴","🤣","😎"];
 let chatRenderedIds = new Set();
 let chatRecorder = null, chatRecordedChunks = [], chatIsRecording = false;
@@ -1463,6 +1464,20 @@ function chatBubbleHtml(msg){
   } else if(msg.type === "audio"){
     const src = state.chatMediaCache ? state.chatMediaCache[msg.mediaId] : null;
     inner = src ? `<audio controls src="${src}"></audio>` : `<span style="font-size:12px;">Loading voice note…</span>`;
+  } else if(msg.type === "video"){
+    const src = state.chatMediaCache ? state.chatMediaCache[msg.mediaId] : null;
+    inner = src ? `<video class="chat-video" controls playsinline src="${src}"></video>` : `<span style="font-size:12px;">Loading video…</span>`;
+  } else if(msg.type === "file"){
+    const src = state.chatMediaCache ? state.chatMediaCache[msg.mediaId] : null;
+    inner = src
+      ? `<a class="chat-file-card" href="${src}" download="${(msg.fileName||"file").replace(/"/g,"")}">
+          <span class="chat-file-icon">${fileIconFor(msg.fileName)}</span>
+          <span class="chat-file-info">
+            <span class="chat-file-name">${(msg.fileName||"Document").replace(/</g,"&lt;")}</span>
+            <span class="chat-file-size">${formatFileSize(msg.fileSize)} · Tap to open</span>
+          </span>
+        </a>`
+      : `<span style="font-size:12px;">Loading document…</span>`;
   } else if(msg.type === "sticker"){
     inner = msg.text;
   } else {
@@ -1471,7 +1486,7 @@ function chatBubbleHtml(msg){
   return `
     <div class="chat-bubble-row ${mine?"me":"them"}" data-msg-id="${msg.id}">
       ${!mine ? `<div class="chat-sender">${senderName}</div>` : ""}
-      <div class="chat-bubble${msg.type==="sticker"?" sticker":""}">${inner}</div>
+      <div class="chat-bubble${msg.type==="sticker"?" sticker":""}${msg.type==="video"||msg.type==="file"?" media":""}">${inner}</div>
       <div class="chat-time">${time}</div>
     </div>
   `;
@@ -1511,6 +1526,8 @@ async function renderChat(){
       <div class="chat-inputbar">
         <input type="file" accept="image/*" id="chat-photo-file" style="display:none;">
         <div class="chat-icon-btn" id="chat-photo-btn" title="Photo">📷</div>
+        <input type="file" accept="video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip" id="chat-doc-file" style="display:none;">
+        <div class="chat-icon-btn" id="chat-doc-btn" title="Video or document">📎</div>
         <div class="chat-icon-btn" id="chat-sticker-btn" title="Stickers">😊</div>
         <input type="text" id="chat-text" placeholder="Message the house...">
         <div class="chat-icon-btn" id="chat-mic-btn" title="Voice message">🎤</div>
@@ -1533,6 +1550,24 @@ async function renderChat(){
       await sendChatMessage({ type:"image", dataUrl });
     }catch(e){ alert("That photo couldn't be sent. Try a different one."); }
     $("#chat-photo-file").value = "";
+  };
+
+  $("#chat-doc-btn").onclick = ()=> $("#chat-doc-file").click();
+  $("#chat-doc-file").onchange = async ()=>{
+    const f = $("#chat-doc-file").files[0];
+    if(!f) return;
+    const btn = $("#chat-doc-btn");
+    const original = btn.textContent;
+    btn.textContent = "⏳";
+    try{
+      const dataUrl = await readFileAsDataURL(f);
+      const type = f.type && f.type.startsWith("video/") ? "video" : "file";
+      await sendChatMessage({ type, dataUrl, fileName: f.name, fileSize: f.size });
+    }catch(e){
+      alert(e && e.message ? e.message : "That file couldn't be sent. Try a different one.");
+    }
+    btn.textContent = original;
+    $("#chat-doc-file").value = "";
   };
 
   $("#chat-sticker-btn").onclick = ()=>{
@@ -1596,9 +1631,11 @@ async function toggleChatRecording(){
   }
 }
 
-// opts: { type, text, dataUrl }. Media (image/audio) is uploaded to its own
-// small key first — the shared chat list only ever stores the short
-// mediaId, exactly like every other photo in this app.
+// opts: { type, text, dataUrl, fileName, fileSize }. Media (image/audio/
+// video/file) is uploaded to its own small key first — the shared chat
+// list only ever stores the short mediaId (plus fileName/fileSize for
+// documents, so the bubble/card can show them without re-loading the
+// bytes), exactly like every other photo in this app.
 async function sendChatMessage(opts){
   const id = "msg_" + Date.now() + Math.random().toString(36).slice(2,6);
   let mediaId = null;
@@ -1611,13 +1648,19 @@ async function sendChatMessage(opts){
   }
   const msg = {
     id, from: state.session.username, type: opts.type,
-    text: opts.text || null, mediaId, createdAt: new Date().toISOString()
+    text: opts.text || null, mediaId,
+    fileName: opts.fileName || null, fileSize: opts.fileSize || null,
+    createdAt: new Date().toISOString()
   };
   state.chat.push(msg); // optimistic local echo
   const saved = await sappend("ms-villa:chat", msg, "id");
   if(saved !== null) state.chat = saved;
   renderChat();
-  const preview = opts.type==="image" ? "📷 Photo" : opts.type==="audio" ? "🎤 Voice message" : opts.type==="sticker" ? `${opts.text} Sticker` : opts.text;
+  const preview = opts.type==="image" ? "📷 Photo"
+    : opts.type==="audio" ? "🎤 Voice message"
+    : opts.type==="video" ? "🎥 Video"
+    : opts.type==="file" ? `📎 ${opts.fileName || "Document"}`
+    : opts.type==="sticker" ? `${opts.text} Sticker` : opts.text;
   notifyMembers("New message in House Chat", `${nameFor(state.session.username, state.members)}: ${preview}`);
 }
 

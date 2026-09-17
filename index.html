@@ -189,6 +189,28 @@
   .complaint-card .desc{ font-size:13px; color:var(--ink); opacity:.9; margin-top:6px; line-height:1.4; }
   .complaint-card .meta{ font-size:11px; color:var(--muted); margin-top:8px; }
 
+  /* --- Notification Center: type accent + icon chip ---------------------
+     Each entry gets a left accent bar and a small icon chip whose color
+     hints at what it's about (payment / duty / meeting / complaint /
+     general), so the list scans at a glance instead of reading as one
+     undifferentiated wall of text. */
+  .notif-card{ display:flex; gap:12px; border-left-width:3px; border-left-style:solid; }
+  .notif-card.type-payment{ border-left-color:var(--accent); }
+  .notif-card.type-duty{ border-left-color:var(--good); }
+  .notif-card.type-meeting{ border-left-color:#6C9BD1; }
+  .notif-card.type-complaint{ border-left-color:var(--danger); }
+  .notif-card.type-general{ border-left-color:var(--muted); }
+  .notif-icon{ flex:none; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; }
+  .notif-icon svg{ width:17px; height:17px; stroke-width:1.6; }
+  .notif-card.type-payment .notif-icon{ background:rgba(212,168,83,.16); color:var(--accent); }
+  .notif-card.type-duty .notif-icon{ background:rgba(79,191,139,.14); color:var(--good); }
+  .notif-card.type-meeting .notif-icon{ background:rgba(108,155,209,.16); color:#6C9BD1; }
+  .notif-card.type-complaint .notif-icon{ background:rgba(224,107,92,.14); color:var(--danger); }
+  .notif-card.type-general .notif-icon{ background:var(--panel-2); color:var(--muted); }
+  .notif-card .notif-body{ flex:1; min-width:0; }
+  .notif-card.is-unread{ box-shadow:0 2px 8px rgba(5,42,61,.05), 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .notif-card.is-unread .notif-icon{ animation: ms-pop .4s cubic-bezier(.2,.7,.3,1) both; }
+
   .meeting-card{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--good); border-radius:6px; padding:14px 16px; margin:0 18px 12px; box-shadow:0 2px 8px rgba(5,42,61,.05); }
   .meeting-card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
   .meeting-card .title{ font-size:15px; color:var(--ink); font-weight:800; }
@@ -288,7 +310,14 @@
   .chat-bubble-row.them .chat-bubble{ background:var(--panel); border:1px solid var(--line); color:var(--ink); border-bottom-left-radius:4px; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
   .chat-bubble img.chat-img{ max-width:220px; max-height:260px; border-radius:12px; display:block; object-fit:cover; }
   .chat-bubble audio{ max-width:220px; height:36px; }
+  .chat-bubble video.chat-video{ max-width:240px; max-height:300px; border-radius:12px; display:block; background:#000; }
   .chat-bubble.sticker{ background:transparent !important; border:none !important; box-shadow:none; font-size:44px; padding:2px; }
+  .chat-bubble.media{ background:transparent !important; border:none !important; box-shadow:none; padding:0; }
+  .chat-file-card{ display:flex; align-items:center; gap:10px; width:220px; max-width:64vw; padding:10px 12px; background:var(--panel); border:1px solid var(--line); border-radius:14px; text-decoration:none; color:inherit; box-shadow:0 2px 8px rgba(5,42,61,.08); }
+  .chat-file-icon{ flex:none; font-size:22px; }
+  .chat-file-info{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .chat-file-name{ font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chat-file-size{ font-size:11px; color:var(--muted); }
   .chat-time{ font-size:10px; color:var(--muted); margin-top:3px; }
   .chat-inputbar{ display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--panel); border-top:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
   .chat-inputbar input[type=text]{ flex:1; margin:0; border-radius:22px; padding:11px 16px; }
