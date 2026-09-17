@@ -36,7 +36,14 @@ export default async (req) => {
     if (!key) {
       return jsonResponse({ error: "Missing 'key' query parameter." }, 400);
     }
-    const value = await store.get(key, { type: "json" }).catch(() => null);
+    // "strong" consistency: without this, a read can hit an edge cache that
+    // hasn't caught up with a write that just happened a moment earlier on
+    // another device (Netlify Blobs is eventually consistent by default).
+    // That's the "I entered data, refreshed, and it looked gone — refreshed
+    // again and it was back" bug: the first refresh raced the write, the
+    // second one landed after it had propagated. Reading strong everywhere
+    // removes that race entirely.
+    const value = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
     return jsonResponse({ value: value === undefined ? null : value });
   }
 
@@ -57,8 +64,11 @@ export default async (req) => {
     if (action === "batchGet") {
       const keys = Array.isArray(body.keys) ? body.keys : [];
       const values = {};
+      // Same "strong" reasoning as the single GET above — this is the path
+      // loadCore() uses on every boot/refresh, so it's the one most
+      // responsible for "my edit disappeared until I refreshed twice."
       await Promise.all(keys.map(async (key) => {
-        values[key] = await store.get(key, { type: "json" }).catch(() => null);
+        values[key] = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
       }));
       return jsonResponse({ values });
     }
